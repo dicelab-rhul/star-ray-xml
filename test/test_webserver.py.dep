@@ -1,0 +1,69 @@
+from fastapi import FastAPI, WebSocket, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, FileResponse
+import asyncio
+import pathlib
+from lxml import etree
+import re
+from star_ray_xml import XMLState, update, insert, delete
+
+NAMESPACES = {"svg": "http://www.w3.org/2000/svg"}
+
+app = FastAPI()
+STATIC = (pathlib.Path(__file__).parent.parent / "static").resolve()
+
+# remove all newlines/white space at the top level to avoid issues if this file is auto-formated
+app.mount("/static", StaticFiles(directory=STATIC))
+events = [
+    # update(xpath="//svg:svg/svg:circle", attrs={"cx": "10"}),
+    update(
+        xpath="//svg:svg/svg:circle",
+        attrs="""<svg:circle xmlns:svg="http://www.w3.org/2000/svg" id="circle-1" cx="100" cy="50" fill="blue" r="10"/>""",
+    ),
+]
+
+
+@app.get("/")
+async def get_index(request: Request):
+    return FileResponse(str(STATIC / "index.html"))
+
+
+# WebSocket endpoint for handling client connections
+@app.websocket("/socket")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    XML = await websocket.receive_text()
+    parser = etree.XMLParser(remove_comments=True)
+    xml_state = XMLState(XML, namespaces=NAMESPACES, parser=parser)
+
+    while events:
+        event = events.pop()
+        await websocket.send_json(event.model_dump())
+        received = await websocket.receive_text()
+        if received.startswith("<"):
+            xml_received = etree.tostring(
+                etree.XML(received, parser=parser), method="c14n"
+            )  # canonical form
+            xml_state.update(event)
+            xml = etree.tostring(xml_state.get_root()._base, method="c14n")
+            if xml == xml_received:
+                print("SUCCESS: ", event)
+            else:
+                print("FAIL:", event)
+                print(received)
+                print(xml.decode("utf-8"))
+                print(xml_received.decode("utf-8"))
+                print()
+
+        else:
+            print("FAIL: (CLIENT ERROR): ", received)
+
+        await asyncio.sleep(0.1)  # Optional delay between sending events
+
+
+2
+# Run the server
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
