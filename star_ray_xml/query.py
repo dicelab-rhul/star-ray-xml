@@ -1,10 +1,7 @@
 """ TODO """
 
 from typing import Dict, List, Any
-from pydantic import BaseModel
 from star_ray.event import Action
-from star_ray.utils.literal_eval import literal_eval_with_ops
-from collections import defaultdict
 
 
 class XPathQueryError(Exception):

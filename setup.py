@@ -10,10 +10,14 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(),
     url="https://github.com/BenedictWilkins/star_ray_xml",
-    install_requires=["pyparsing", "aiostream"],
+    install_requires=[
+        "star_ray",
+        "lxml",
+        "pydantic",
+    ],
     python_requires=">=3.10",
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Programming Language :: Python :: 3.10",

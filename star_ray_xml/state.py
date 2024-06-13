@@ -1,18 +1,21 @@
 """ TODO """
 
-from typing import Dict, List, Any, Tuple, Type
-from lxml import etree as ET
-from copy import deepcopy
-from functools import wraps
-from pydantic import BaseModel
 import re
 import ast
+from typing import Dict, List, Any, Tuple, Type
+from copy import deepcopy
+from functools import wraps
+
+from lxml import etree as ET
+from pydantic import BaseModel
 
 from star_ray.pubsub._pubsub import Subscriber
-from .query import Select, Update, Delete, Replace, Insert, XPathQueryError
 from star_ray.utils.literal_eval import literal_eval_with_ops
 from star_ray.pubsub import EventPublisher, TopicPublisher, _fully_qualified_name
 from star_ray.event import Event
+
+from .query import Select, Update, Delete, Replace, Insert, XPathQueryError
+
 
 TEXT = "@text"
 TAIL = "@tail"

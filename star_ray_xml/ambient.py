@@ -1,8 +1,9 @@
-import asyncio
+""" TODO """
+
 from typing import List, Dict
 from star_ray import Ambient, Agent
 from star_ray.event import ActiveObservation, ErrorActiveObservation
-from star_ray.pubsub import Subscribe, Unsubscribe, EventPublisher
+from star_ray.pubsub import Subscribe, Unsubscribe
 
 from .state import XMLState
 from .query import Select, Update, Insert, Delete, Replace, XPathQuery
