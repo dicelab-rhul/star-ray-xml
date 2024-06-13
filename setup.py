@@ -9,7 +9,7 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     packages=find_packages(),
-    url="https://github.com/BenedictWilkins/star_ray_xml",
+    url="https://github.com/dicelab-rhul/star_ray_xml",
     install_requires=[
         "star_ray",
         "lxml",

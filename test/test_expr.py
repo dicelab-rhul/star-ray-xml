@@ -23,7 +23,6 @@ class TestExpr(unittest.TestCase):
     def test_eval_with_list(self):
         expr = "{other} + {value}"
         expr_obj = Expr(expr, other=[2, 3, 4])
-        print(expr_obj.expr)
         result = expr_obj.eval(None, [3, 5, 10, 2])
         self.assertEqual(result, [2, 3, 4, 3, 5, 10, 2])
 

@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from star_ray.pubsub._pubsub import Subscriber
 from star_ray.utils.literal_eval import literal_eval_with_ops
-from star_ray.pubsub import EventPublisher, TopicPublisher, _fully_qualified_name
+from star_ray.pubsub import EventPublisher, TopicPublisher
 from star_ray.event import Event
 
 from .query import Select, Update, Delete, Replace, Insert, XPathQueryError
@@ -28,19 +28,19 @@ PREFIX = "@prefix"
 class XMLElementChangePublisher(TopicPublisher):
 
     def subscribe(self, topic: Tuple[str, Type[Event]], subscriber: Subscriber) -> None:
-        topic = (topic[0], _fully_qualified_name(topic[1]))
+        topic = (topic[0], EventPublisher.fully_qualified_name(topic[1]))
         return super().subscribe(topic, subscriber)
 
     def unsubscribe(
         self, topic: Tuple[str, Type[Event]], subscriber: Subscriber
     ) -> None:
-        topic = (topic[0], _fully_qualified_name(topic[1]))
+        topic = (topic[0], EventPublisher.fully_qualified_name(topic[1]))
         return super().unsubscribe(topic, subscriber)
 
     def notify_subscribers(self, message: Tuple["_Element", Event]) -> None:
         element_id = message[0].get("id", None)
         if not element_id is None:
-            topic = (element_id, _fully_qualified_name(type(message[1])))
+            topic = (element_id, EventPublisher.fully_qualified_name(type(message[1])))
             new_attributes = message[0].get_attributes()
             for sub in self._subscribers[topic]:
                 sub.__notify__(deepcopy(new_attributes))
