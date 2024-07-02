@@ -91,14 +91,14 @@ class Expr(Template):
 
 def set_xpath_on_exception(fun):
     @wraps(fun)
-    def set_xpath_on_exception(*args):
+    def _set_xpath_on_exception(*args):
         try:
             return fun(*args)
         except XPathQueryError as e:
             e.kwargs["xpath"] = args[1].xpath
             raise
 
-    return set_xpath_on_exception
+    return _set_xpath_on_exception
 
 
 XML_START_PATTERN = re.compile(r"^\s*<")
@@ -286,7 +286,7 @@ class _Element:
         elif self.is_result:
             return _Element.literal_eval(self._base)
         else:
-            raise XPathQueryError("Failed to convert element {self} to literal.")
+            raise XPathQueryError(f"Failed to convert element {self} to literal.")
 
     def __str__(self):
         return str(self._base)
@@ -299,16 +299,13 @@ class _Element:
 
 
 class XMLState(EventPublisher):
-    """
-    A class to represent and manipulate XML data.
-    """
+    """A class to represent and manipulate XML data."""
 
     def __init__(
         self,
         xml: str,
         namespaces: Dict[str, str] = None,
         parser: ET.XMLParser = None,
-        # inherit_namespaces: bool = True,  # this is for inserting elements and my sanity TODO document properly
     ):
         super().__init__()
         if parser is None:

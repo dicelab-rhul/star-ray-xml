@@ -1,7 +1,5 @@
 import unittest
 import re
-from lxml import etree
-
 from star_ray_xml import XMLState, XPathQueryError, select, delete, update, insert
 
 XML = """
