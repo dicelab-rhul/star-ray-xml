@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="star_ray_xml",
-    version="0.0.1",
+    version="0.0.2",
     author="Benedict Wilkins",
     author_email="benrjw@gmail.com",
     description="An optional extra for the `star_ray` package that supports XML environment state and associated query events.",
@@ -11,7 +11,7 @@ setup(
     packages=find_packages(),
     url="https://github.com/dicelab-rhul/star_ray_xml",
     install_requires=[
-        "star_ray==0.0.3",
+        "star_ray>=0.0.3",
         "lxml",
         "pydantic",
     ],
