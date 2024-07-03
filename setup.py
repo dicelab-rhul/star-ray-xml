@@ -11,7 +11,7 @@ setup(
     packages=find_packages(),
     url="https://github.com/dicelab-rhul/star_ray_xml",
     install_requires=[
-        "star_ray",
+        "star_ray==0.0.3",
         "lxml",
         "pydantic",
     ],
