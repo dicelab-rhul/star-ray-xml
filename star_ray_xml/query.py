@@ -1,7 +1,21 @@
 """ TODO """
-
-from typing import Dict, List, Any
+from __future__ import annotations
+from abc import ABC, abstractmethod
+from typing import Dict, List, Any, TYPE_CHECKING
 from star_ray.event import Action
+
+if TYPE_CHECKING:
+    from .state import XMLState
+
+__all__ = ("XMLQuery", "XPathQuery", "Update")
+
+
+class XMLQuery(ABC, Action):
+    """Base class for XML queries."""
+
+    @abstractmethod
+    def __execute__(self, state: XMLState) -> Any:
+        pass
 
 
 class XPathQueryError(Exception):
@@ -17,8 +31,8 @@ class XPathQueryError(Exception):
         return str(self)
 
 
-class XPathQuery(Action):
-    """Base class for XML queries."""
+class XPathQuery(XMLQuery):
+    """Base class for XML queries that use `xpath`."""
 
     xpath: str
 
@@ -61,6 +75,9 @@ class Insert(XPathQuery):
     def is_write_element(self):
         return False
 
+    def __execute__(self, state: XMLState) -> Any:
+        return state.insert(self)
+
 
 class Delete(XPathQuery):
     """Query to delete an XML element."""
@@ -80,6 +97,9 @@ class Delete(XPathQuery):
 
     def is_write_element(self):
         return False
+
+    def __execute__(self, state: XMLState) -> Any:
+        return state.delete(self)
 
 
 class Replace(XPathQuery):
@@ -103,6 +123,9 @@ class Replace(XPathQuery):
     def is_write_element(self):
         return False
 
+    def __execute__(self, state: XMLState) -> Any:
+        return state.replace(self)
+
 
 class Update(XPathQuery):
     """Query to update XML element attributes."""
@@ -125,6 +148,9 @@ class Update(XPathQuery):
     def is_write_element(self):
         return True
 
+    def __execute__(self, state: XMLState) -> Any:
+        return state.update(self)
+
 
 class Select(XPathQuery):
     """Query to select XML elements and their attributes."""
@@ -146,6 +172,9 @@ class Select(XPathQuery):
 
     def is_write_element(self):
         return False
+
+    def __execute__(self, state: XMLState) -> Any:
+        return state.select(self)
 
 
 def insert(xpath: str, element: str, index: int = 0):

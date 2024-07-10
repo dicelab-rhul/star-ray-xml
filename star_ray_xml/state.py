@@ -21,7 +21,7 @@ TEXT = "@text"
 TAIL = "@tail"
 HEAD = "@head"
 TAG = "@tag"  # <svg:g/> tag = "g"
-NAME = "@name"  #  <svg:g/> name = "svg:g"
+NAME = "@name"  # <svg:g/> name = "svg:g"
 PREFIX = "@prefix"
 
 
@@ -40,7 +40,8 @@ class XMLElementChangePublisher(TopicPublisher):
     def notify_subscribers(self, message: Tuple["_Element", Event]) -> None:
         element_id = message[0].get("id", None)
         if not element_id is None:
-            topic = (element_id, EventPublisher.fully_qualified_name(type(message[1])))
+            topic = (element_id, EventPublisher.fully_qualified_name(
+                type(message[1])))
             new_attributes = message[0].get_attributes()
             for sub in self._subscribers[topic]:
                 sub.__notify__(deepcopy(new_attributes))
@@ -286,7 +287,8 @@ class _Element:
         elif self.is_result:
             return _Element.literal_eval(self._base)
         else:
-            raise XPathQueryError(f"Failed to convert element {self} to literal.")
+            raise XPathQueryError(
+                f"Failed to convert element {self} to literal.")
 
     def __str__(self):
         return str(self._base)
@@ -474,7 +476,8 @@ class XMLState(EventPublisher):
                 child = XMLState._new_element(query.element, parser=parser)
                 element.insert(query.index, child)
             else:
-                XMLState._insert_text_at(element, query.element, index=query.index)
+                XMLState._insert_text_at(
+                    element, query.element, index=query.index)
         else:
             raise XPathQueryError(
                 "Failed to insert into xpath result: `{element}` must be an xml element, xpath: `{xpath}`",

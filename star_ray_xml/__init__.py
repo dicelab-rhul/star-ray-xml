@@ -11,6 +11,7 @@ from .query import (
     Delete,
     Replace,
     Update,
+    XMLQuery,
     XPathQuery,
     XPathQueryError,
 )
@@ -34,6 +35,7 @@ __all__ = (
     "Update",
     "Expr",
     "Template",
+    "XMLQuery",
     "XPathQuery",
     "XPathQueryError",
 )
