@@ -1,14 +1,16 @@
-"""TODO"""
+"""Package defining the `XMLState` class along with its default implementation (based on `lxml`)."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any
+from typing import Any
 from functools import wraps
-
 from lxml import etree as ET
 
 from .query import Select, Update, Delete, Replace, Insert, XMLQueryError
 from ._element import _Element, XML_START_PATTERN
 
+__all__ = ("XMLState", "_XMLState")
+
+# special variable keys
 TEXT = "@text"  # inner text of the element
 TAIL = "@tail"  # text that appears AFTER the element
 HEAD = "@head"  # text that appears BEFORE the element
@@ -16,32 +18,9 @@ TAG = "@tag"  # <svg:g/> tag = "g"
 NAME = "@name"  # <svg:g/> name = "svg:g"
 PREFIX = "@prefix"  # <svg:g/> prefix = "svg"
 
-__all__ = ("XMLState", "_XMLState")
-
-# TODO?
-# class XMLElementChangePublisher(TopicPublisher):
-
-#     def subscribe(self, topic: Tuple[str, Type[Event]], subscriber: Subscriber) -> None:
-#         topic = (topic[0], EventPublisher.fully_qualified_name(topic[1]))
-#         return super().subscribe(topic, subscriber)
-
-#     def unsubscribe(
-#         self, topic: Tuple[str, Type[Event]], subscriber: Subscriber
-#     ) -> None:
-#         topic = (topic[0], EventPublisher.fully_qualified_name(topic[1]))
-#         return super().unsubscribe(topic, subscriber)
-
-#     def notify_subscribers(self, message: Tuple["_Element", Event]) -> None:
-#         element_id = message[0].get("id", None)
-#         if element_id is not None:
-#             topic = (element_id, EventPublisher.fully_qualified_name(type(message[1])))
-#             new_attributes = message[0].get_attributes()
-#             for sub in self._subscribers[topic]:
-#                 sub.__notify__(deepcopy(new_attributes))
-
 
 def _set_xpath_on_exception(fun):
-    """Utility method that sets the `xpath` attribute of an `XMLQueryError` if it is raised in a function."""
+    """Utility decorator that sets the `xpath` attribute of an `XMLQueryError` if it is raised in a function."""
 
     @wraps(fun)
     def _set_xpath_on_exception(*args):
@@ -59,23 +38,43 @@ class XMLState(ABC):
 
     @abstractmethod
     def update(self, query: Update):
-        pass
+        """Updates elements in the XML state based on the provided `Update` query.
+
+        Args:
+            query (Update): update query
+        """
 
     @abstractmethod
     def insert(self, query: Insert):
-        pass
+        """Inserts new elements into the XML state based on the provided `Insert` query. See the query class for details.
+
+        Args:
+            query (Insert): insert query
+        """
 
     @abstractmethod
     def replace(self, query: Replace):
-        pass
+        """Replaces elements in the XML state based on the provided `Replace` query. See the query class for details.
+
+        Args:
+            query (Replace): replace query
+        """
 
     @abstractmethod
     def delete(self, query: Delete):
-        pass
+        """Deletes elements from the XML state based on the provided `Delete` query. See the query class for details.
+
+        Args:
+            query (Delete): delete query
+        """
 
     @abstractmethod
     def select(self, query: Select):
-        pass
+        """Retrieves data from the XML state based on the provided `Select` query. See the query class for details.
+
+        Args:
+            query (Select): select query
+        """
 
 
 class _XMLState(XMLState):
@@ -84,7 +83,7 @@ class _XMLState(XMLState):
     def __init__(
         self,
         xml: str,
-        namespaces: Dict[str, str] | None = None,
+        namespaces: dict[str, str] | None = None,
         parser: ET.XMLParser | None = None,
     ):
         super().__init__()
@@ -97,31 +96,55 @@ class _XMLState(XMLState):
     def __str__(self):
         return str(ET.tostring(self._root._base, method="c14n2", with_comments=False))
 
-    def xpath(self, xpath: str) -> List[_Element]:
+    def xpath(self, xpath: str) -> list[_Element]:
         """Query inner xml using xpath producing a (possibly empty) list of elements that are the result of the query.
 
         Args:
             xpath (str): xpath query
 
         Returns:
-            List[_Element]: elements that result from the query
+            list[_Element]: elements that result from the query
         """
         return self._root.xpath(xpath, namespaces=self._namespaces)
 
     def get_root(self) -> _Element:
+        """Get the root element.
+
+        Returns:
+            _Element: the root element.
+        """
         return self._root
 
-    def get_namespaces(self) -> Dict[str, str]:
+    def get_namespaces(self) -> dict[str, str]:
+        """Get XML namespaces (prefix -> URI).
+
+        Returns:
+            dict[str, str]: namespaces
+        """
         return self._namespaces
 
     @_set_xpath_on_exception
     def update(self, query: Update) -> None:
+        """Updates the attributes of XML element(s) based on the `Update` query.
+
+        Args:
+            query (Update): query
+        """
         elements = self.xpath(query.xpath)
         for element in elements:
             _XMLState.update_element_attributes(element, query.attrs)
 
     @_set_xpath_on_exception
     def insert(self, query: Insert) -> None:
+        """Inserts an XML element based on the `Insert` query.
+
+        Args:
+            query (Insert): query
+
+        Raises:
+            XMLQueryError: if a parent element could not be found (this is defined by the `xpath` of the Insert query)
+            XMLQueryError: If multiple parents were found - this is not currently supported by may be in the future.
+        """
         elements = self.xpath(query.xpath)
         if len(elements) == 0:
             raise XMLQueryError(
@@ -129,22 +152,32 @@ class _XMLState(XMLState):
             )
         if len(elements) > 1:
             raise XMLQueryError(
-                "Invalid xpath: `{xpath}` for `insert`, found {elements_length} but only 1 is allowed.",
+                "Invalid xpath: `{xpath}` for `insert`, found {elements_length} but only one is allowed.",
                 elements_length=len(elements),
             )
-        _XMLState.insert_in_element(
+        return _XMLState.insert_in_element(
             elements[0],
             query,
             parser=self._parser,
-            # inherit_namespaces=self._inherit_namespaces,
         )
 
-    @_set_xpath_on_exception
+    @_set_xpath_on_exception  # TODO implement Replace!
     def replace(self, query: Replace) -> None:
+        """Replaces an XML element based on the `Replace` query.
+
+        NOTE: THIS QUERY TYPE IS CURRENTLY NOT IMPLEMENTED but is planned as part of the next release.
+
+        Args:
+            query (Replace): query
+
+        Raises:
+            XMLQueryError: If multiple elements were found to replace (only one is allowed).
+            NotImplementedError: THIS QUERY TYPE IS CURRENTLY NOT IMPLEMENTED
+        """
         elements = self.xpath(query.xpath)
         if len(elements) > 1:
             raise XMLQueryError(
-                "Invalid xpath: `{xpath}` for `insert`, found {elements_length} but only 1 is allowed.",
+                "Invalid xpath: `{xpath}` for `replace`, found {elements_length} but only one is allowed.",
                 elements_length=len(elements),
             )
         raise NotImplementedError(
@@ -153,22 +186,38 @@ class _XMLState(XMLState):
 
     @_set_xpath_on_exception
     def delete(self, query: Delete) -> None:
+        """Deletes one or more XML elements based on the `Delete` query.
+
+        Args:
+            query (Delete): query
+
+        Raises:
+            XMLQueryError: If no elements were found for deletion.
+        """
         elements = self.xpath(query.xpath)
-        if len(elements) > 1:
+        if len(elements) == 0:
             raise XMLQueryError(
-                "Invalid xpath: `{xpath}` for `delete`, found {elements_length} but only 1 is allowed.",
-                elements_length=len(elements),
+                "No elements was found for deletion at xpath: {xpath}",
             )
-        _XMLState.delete_element(elements[0])
+        for element in elements:
+            _XMLState.delete_element(element)
 
     @_set_xpath_on_exception
-    def select(self, query: Select) -> List[Any]:
+    def select(self, query: Select) -> list[Any]:
+        """Select an element or its attributes based on the `Select` query.
+
+        Args:
+            query (Select): query
+
+        Returns:
+            list[Any]: list of results of the select (one per xpath result), typically will consist of python literal types (int, float, bool, str, list, dict).
+        """
         elements = self.xpath(query.xpath)
         result = [_XMLState.select_from_element(element, query) for element in elements]
         return result
 
     @staticmethod
-    def update_element_attributes(element: _Element, attrs: Dict[str, Any]):
+    def update_element_attributes(element: _Element, attrs: dict[str, Any]):
         if not element.is_element:
             raise XMLQueryError(
                 "Failed to update: `{element}` is not an xml element. (xpath: `{xpath}`)",
@@ -283,7 +332,7 @@ class _XMLState(XMLState):
             )
 
     @staticmethod
-    def _delete_element_attributes(element: _Element, attrs: List[str]):
+    def _delete_element_attributes(element: _Element, attrs: list[str]):
         for attr in attrs:
             if not attr.startswith("@"):
                 element.remove_attribute(attr)
@@ -332,12 +381,12 @@ class _XMLState(XMLState):
             )
 
     @staticmethod
-    def _iter_element_attributes(element: _Element, attrs: List[str]):
+    def _iter_element_attributes(element: _Element, attrs: list[str]):
         """Get all attribute values from an element.
 
         Args:
             element (_Element): element to get attribute values from.
-            attrs (List[str]): attributes to get
+            attrs (list[str]): attributes to get
 
         Raises:
             XMLQueryError: if an unknown special attribute is provided as part of `attrs`.
