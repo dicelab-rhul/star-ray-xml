@@ -1,10 +1,10 @@
-""" TODO """
+"""TODO"""
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any, TYPE_CHECKING
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 from star_ray.event import Action
 from star_ray.utils.literal_eval import literal_eval_with_ops
 
@@ -27,7 +27,6 @@ class _format_dict_template(dict):
 
 
 class Expr(BaseModel):  # TODO test this
-
     expr: str
 
     def __init__(self, expr: str, **values: Dict[str, Any]):
@@ -66,7 +65,6 @@ class XMLQuery(ABC, Action):
 
 
 class XMLQueryError(Exception):
-
     def __init__(self, message, **kwargs):
         super().__init__(message)
         self.kwargs = kwargs

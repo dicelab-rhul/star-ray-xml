@@ -1,6 +1,6 @@
 import unittest
 import re
-from star_ray_xml import XMLState, XMLQueryError, select, delete, update, insert
+from star_ray_xml import _XMLState, XMLQueryError, select, delete, update, insert
 
 XML = """
 <svg:svg width="200" height="200" xmlns:svg="http://www.w3.org/2000/svg">
@@ -20,15 +20,14 @@ NAMESPACES = {"svg": "http://www.w3.org/2000/svg"}
 
 
 class TestUpdate(unittest.TestCase):
-
     def test_update_attributes(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         state.update(update(xpath="//svg:svg/svg:circle", attrs={"cx": "10"}))
         result = state.xpath("//svg:svg/svg:circle/@cx")
         self.assertListEqual(result, ["10", "10"])
 
     def test_update_error(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         with self.assertRaises(XMLQueryError):
             state.update(update(xpath="//svg:svg", attrs={"@tag": "new"}))
         with self.assertRaises(XMLQueryError):
@@ -41,7 +40,7 @@ class TestUpdate(unittest.TestCase):
             state.update(update(xpath="name(//svg:svg)", attrs={"a": 1}))
 
     def test_update_text_attribute(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         state.update(update(xpath="//svg:svg/svg:g", attrs={"@text": "new"}))
         text = state.xpath("//svg:svg/svg:g[@id='g2']/text()")
         self.assertListEqual(text, ["new"])  # empty
@@ -49,7 +48,7 @@ class TestUpdate(unittest.TestCase):
         self.assertListEqual(text, ["new"])  # empty
 
     def test_update_tail(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         state.update(update(xpath="//svg:svg/svg:g", attrs={"@tail": "new"}))
         text = state.xpath("//svg:svg/text()")
         # NOTE: this is setting the tail for all g, including the g1 which initially is without a tail!
@@ -57,11 +56,10 @@ class TestUpdate(unittest.TestCase):
 
 
 class TestInsert(unittest.TestCase):
-
     def test_insert_element_(self):
         # insert element
         ELEMENT = """<svg:circle xmlns:svg="http://www.w3.org/2000/svg" cx="120" cy="60" r="10" fill="blue"/>"""
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         state.insert(insert(xpath="//svg:svg", element=ELEMENT, index=1))
         elements = state.xpath("//svg:svg/svg:circle")
         self.assertEqual(len(elements), 3)
@@ -69,14 +67,14 @@ class TestInsert(unittest.TestCase):
 
         # insert element with child
         ELEMENT = """<svg:svg xmlns:svg="http://www.w3.org/2000/svg"> <svg:circle/> </svg:svg>"""
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         state.insert(insert(xpath="//svg:svg", element=ELEMENT, index=1))
         elements = state.xpath("//svg:svg/svg:svg/svg:circle")
         self.assertEqual(len(elements), 1)
 
     def test_insert_text(self):
         ELEMENT = "some text"
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         state.insert(insert(xpath="//svg:svg", element=ELEMENT, index=2))
         elements = state.xpath("//svg:svg/node()")
         self.assertEqual(elements[2], ELEMENT)
@@ -87,21 +85,20 @@ class TestInsert(unittest.TestCase):
 
 
 class TestDelete(unittest.TestCase):
-
     def test_delete_element(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         state.delete(delete(xpath="//svg:svg/svg:circle[@fill='green']"))
         elements = state.xpath("//svg:svg/svg:circle")
         self.assertEqual(elements[0].get("fill"), "red")
 
     def test_delete_attribute(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         state.delete(delete(xpath="//svg:svg/svg:circle[@fill='green']/@cx"))
         elements = state.xpath("//svg:svg/svg:circle[@fill='green']")
         self.assertNotIn("cx", elements[0].get_attributes().keys())
 
     def test_delete_text_attribute(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         text = state.xpath("//svg:svg/svg:g[@id='g2']/text()")
         self.assertListEqual(text, [" "])
         state.delete(delete(xpath="//svg:svg/svg:g[@id='g2']/text()"))
@@ -109,7 +106,7 @@ class TestDelete(unittest.TestCase):
         self.assertFalse(text)  # empty
 
     def test_delete_error(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         with self.assertRaises(XMLQueryError):
             state.delete(delete(xpath="//svg:svg/svg:circle"))
         with self.assertRaises(XMLQueryError):
@@ -121,9 +118,8 @@ class TestDelete(unittest.TestCase):
 
 
 class TestSelect(unittest.TestCase):
-
     def test_select_text(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         result1 = state.select(select(xpath="//svg:svg/svg:g[@id='g1']/text()"))
         result2 = state.select(
             select(xpath="//svg:svg/svg:g[@id='g1']", attrs=["@text"])
@@ -137,12 +133,12 @@ class TestSelect(unittest.TestCase):
         self.assertEqual(result1[0], result2[0]["@text"])
 
     def test_select(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         result = state.select(select(xpath="count(//svg:svg/svg:g)"))
         self.assertListEqual(result, [3])
 
     def test_select_tail(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         result1 = state.select(
             select(xpath="//svg:svg/svg:g[@id='g3']", attrs=["@tail"])
         )
@@ -150,7 +146,7 @@ class TestSelect(unittest.TestCase):
         self.assertEqual(result1[0]["@tail"], result2[-1])
 
     def test_select_name(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         result1 = state.select(select(xpath="name(//svg:svg/svg:g[@id='g1'])"))
         result2 = state.select(
             select(xpath="//svg:svg/svg:g[@id='g1']", attrs=["@name"])
@@ -158,14 +154,14 @@ class TestSelect(unittest.TestCase):
         self.assertListEqual(result1, [result2[0]["@name"]])
 
     def test_select_prefix(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         result = state.select(
             select(xpath="//svg:svg/svg:g[@id='g1']", attrs=["@prefix"])
         )
         self.assertEqual(result[0]["@prefix"], "svg")
 
     def test_select_attributes(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         result1 = state.select(select(xpath="//svg:svg/svg:circle[@fill='green']/@cx"))
         result2 = state.select(
             select(xpath="//svg:svg/svg:circle[@fill='green']", attrs=["cx"])
@@ -178,7 +174,7 @@ class TestSelect(unittest.TestCase):
         self.assertEqual(int(result1[1]), result2[1]["cx"])
 
     def test_select_element(self):
-        state = XMLState(XML, namespaces=NAMESPACES)
+        state = _XMLState(XML, namespaces=NAMESPACES)
         result = state.select(select(xpath="//svg:svg/svg:circle[@fill='green']"))
         self.assertEqual(
             result[0],

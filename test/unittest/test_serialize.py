@@ -3,7 +3,6 @@ from star_ray_xml import Update, Replace, Insert, Delete, Select, Expr
 
 
 class TestEventSerialisation(unittest.TestCase):
-
     def test_update(self):
         u1 = Update(
             xpath="test",

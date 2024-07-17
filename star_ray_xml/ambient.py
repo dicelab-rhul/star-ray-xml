@@ -1,4 +1,4 @@
-""" TODO """
+"""TODO"""
 
 from typing import List, Dict, Any
 from star_ray import Ambient, Agent
@@ -6,14 +6,13 @@ from star_ray.event import ActiveObservation, ErrorActiveObservation
 from star_ray.pubsub import Subscribe, Unsubscribe
 
 from .state import XMLState, _XMLState
-from .query import Select, Update, Insert, Delete, Replace, XMLQuery
+from .query import Select, XMLQuery
 
 DEFAULT_XML = "<xml></xml>"
 DEFAULT_NAMESPACES = {}
 
 
 class XMLAmbient(Ambient):
-
     def __init__(
         self,
         agents: List[Agent],

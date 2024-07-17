@@ -1,4 +1,4 @@
-""" TODO """
+"""TODO"""
 
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any
@@ -169,7 +169,7 @@ class _XMLState(XMLState):
 
     @staticmethod
     def update_element_attributes(element: _Element, attrs: Dict[str, Any]):
-        if not element.is_node:
+        if not element.is_element:
             raise XMLQueryError(
                 "Failed to update: `{element}` is not an xml element. (xpath: `{xpath}`)",
                 element=element,
@@ -232,7 +232,7 @@ class _XMLState(XMLState):
         parser: ET.XMLParser,
         # inherit_namespaces: bool,
     ):
-        if element.is_node:
+        if element.is_element:
             if XML_START_PATTERN.match(query.element):
                 child = _XMLState._new_element(query.element, parser=parser)
                 element.insert(query.index, child)
@@ -267,7 +267,7 @@ class _XMLState(XMLState):
                 "Failed to delete element: `{element}` as it is a literal. (xpath: `{xpath}`)",
                 element=element,
             )
-        elif element.is_node:
+        elif element.is_element:
             element.get_parent().remove(element)
         elif element.is_attribute:
             element.get_parent().remove_attribute(element.attribute_name)
@@ -309,12 +309,12 @@ class _XMLState(XMLState):
 
     @staticmethod
     def select_from_element(element: _Element, query: Select):
-        if element.is_node:
+        if element.is_element:
             if query.attrs:
                 return dict(_XMLState._iter_element_attributes(element, query.attrs))
             else:
                 return element.as_string()
-        elif element.is_result:
+        elif element.is_unicode_result:
             if query.attrs:
                 raise XMLQueryError(
                     "Failed to select attributes: `{element}` is not an xml element, xpath: `{xpath}`",

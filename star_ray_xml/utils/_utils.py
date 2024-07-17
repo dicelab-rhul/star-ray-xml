@@ -1,4 +1,4 @@
-""" Some utility functions for querying XML."""
+"""Some utility functions for querying XML."""
 
 import ast
 import html

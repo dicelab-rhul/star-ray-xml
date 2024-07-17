@@ -6,7 +6,6 @@ from .query import select, XMLQuery
 
 
 class XMLSensor(Sensor):
-
     def __init__(self, *args, subscriptions: Tuple[Type[Action]] = None, **kwargs):
         super().__init__(*args, **kwargs)
         self._subscriptions = subscriptions if subscriptions else (XMLQuery,)
