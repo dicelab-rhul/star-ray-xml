@@ -6,6 +6,7 @@ from .query import (
     delete,
     replace,
     update,
+    Expr,
     Select,
     Insert,
     Delete,
@@ -13,15 +14,16 @@ from .query import (
     Update,
     XMLQuery,
     XPathQuery,
-    XPathQueryError,
+    XMLQueryError,
 )
-from .state import XMLState, Expr, Template
+from .state import XMLState, _XMLState
 from .ambient import XMLAmbient
 from .sensor import XMLSensor
 
 __all__ = (
     "XMLAmbient",
     "XMLState",
+    "_XMLState",
     "XMLSensor",
     "select",
     "insert",
@@ -34,8 +36,8 @@ __all__ = (
     "Replace",
     "Update",
     "Expr",
-    "Template",
+    "Expr",
     "XMLQuery",
     "XPathQuery",
-    "XPathQueryError",
+    "XMLQueryError",
 )

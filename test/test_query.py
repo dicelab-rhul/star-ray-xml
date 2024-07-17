@@ -1,6 +1,6 @@
 import unittest
 import re
-from star_ray_xml import XMLState, XPathQueryError, select, delete, update, insert
+from star_ray_xml import XMLState, XMLQueryError, select, delete, update, insert
 
 XML = """
 <svg:svg width="200" height="200" xmlns:svg="http://www.w3.org/2000/svg">
@@ -29,15 +29,15 @@ class TestUpdate(unittest.TestCase):
 
     def test_update_error(self):
         state = XMLState(XML, namespaces=NAMESPACES)
-        with self.assertRaises(XPathQueryError):
+        with self.assertRaises(XMLQueryError):
             state.update(update(xpath="//svg:svg", attrs={"@tag": "new"}))
-        with self.assertRaises(XPathQueryError):
+        with self.assertRaises(XMLQueryError):
             state.update(update(xpath="//svg:svg", attrs={"@tag": "new"}))
-        with self.assertRaises(XPathQueryError):
+        with self.assertRaises(XMLQueryError):
             state.update(update(xpath="count(//svg:svg/svg:g)", attrs={"a": 1}))
-        with self.assertRaises(XPathQueryError):
+        with self.assertRaises(XMLQueryError):
             state.update(update(xpath="//svg:svg/text()", attrs={"a": 1}))
-        with self.assertRaises(XPathQueryError):
+        with self.assertRaises(XMLQueryError):
             state.update(update(xpath="name(//svg:svg)", attrs={"a": 1}))
 
     def test_update_text_attribute(self):
@@ -98,7 +98,7 @@ class TestDelete(unittest.TestCase):
         state = XMLState(XML, namespaces=NAMESPACES)
         state.delete(delete(xpath="//svg:svg/svg:circle[@fill='green']/@cx"))
         elements = state.xpath("//svg:svg/svg:circle[@fill='green']")
-        self.assertNotIn("cx", elements[0].attrib.keys())
+        self.assertNotIn("cx", elements[0].get_attributes().keys())
 
     def test_delete_text_attribute(self):
         state = XMLState(XML, namespaces=NAMESPACES)
@@ -110,13 +110,13 @@ class TestDelete(unittest.TestCase):
 
     def test_delete_error(self):
         state = XMLState(XML, namespaces=NAMESPACES)
-        with self.assertRaises(XPathQueryError):
+        with self.assertRaises(XMLQueryError):
             state.delete(delete(xpath="//svg:svg/svg:circle"))
-        with self.assertRaises(XPathQueryError):
+        with self.assertRaises(XMLQueryError):
             state.delete(delete(xpath="count(//svg:svg/svg:g)"))
-        with self.assertRaises(XPathQueryError):
+        with self.assertRaises(XMLQueryError):
             state.delete(delete(xpath="//svg:svg/text()"))
-        with self.assertRaises(XPathQueryError):
+        with self.assertRaises(XMLQueryError):
             state.delete(delete(xpath="name(//svg:svg)"))
 
 

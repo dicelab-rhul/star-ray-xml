@@ -2,17 +2,14 @@ from typing import Type, Tuple
 from star_ray.agent import Agent, Sensor, attempt
 from star_ray.event import Action
 from star_ray.pubsub import Subscribe
-from .query import select, Update, Insert, Replace, Delete
+from .query import select, XMLQuery
 
 
 class XMLSensor(Sensor):
 
     def __init__(self, *args, subscriptions: Tuple[Type[Action]] = None, **kwargs):
         super().__init__(*args, **kwargs)
-        self._subscriptions = (
-            subscriptions if subscriptions else (
-                Update, Insert, Replace, Delete)
-        )
+        self._subscriptions = subscriptions if subscriptions else (XMLQuery,)
 
     @attempt
     def select_all(self):

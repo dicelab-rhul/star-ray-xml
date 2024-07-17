@@ -1,13 +1,60 @@
 """ TODO """
+
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any, TYPE_CHECKING
+from pydantic import BaseModel, field_validator
 from star_ray.event import Action
+from star_ray.utils.literal_eval import literal_eval_with_ops
 
 if TYPE_CHECKING:
-    from .state import XMLState
+    from .state import XMLState, _Element
 
 __all__ = ("XMLQuery", "XPathQuery", "Update")
+
+
+# class _format_dict_expr(dict):
+#     def __missing__(self, key):
+#         if key != "value":
+#             raise KeyError(key)
+#         return "{value}"
+
+
+class _format_dict_template(dict):
+    def __missing__(self, key):
+        return f"{{{key}}}"
+
+
+class Expr(BaseModel):  # TODO test this
+
+    expr: str
+
+    def __init__(self, expr: str, **values: Dict[str, Any]):
+        expr = expr.format_map(_format_dict_template(values))
+        super().__init__(expr=expr)
+
+    def eval(self, element: "_Element"):
+        expr = self.expr.format_map(element.get_attributes())
+        result = literal_eval_with_ops(expr)
+        return result
+
+
+# class Expr(Expr):
+
+#     def __init__(self, expr: str, **values: Dict[str, Any]):
+#         assert "value" not in values  # "value" is a reserved key
+#         try:
+#             expr = expr.format_map(_format_dict_expr(values))
+#         except KeyError as e:
+#             raise KeyError(
+#                 f"Key: `{e.args[0]}` missing from {Expr.__name__}: `{expr}`"
+#             ) from e
+#         super().__init__(expr=expr)
+
+#     def eval(self, _: "_Element", value: Any):
+#         expr = self.expr.format(value=value)
+#         return literal_eval_with_ops(expr)
 
 
 class XMLQuery(ABC, Action):
@@ -18,7 +65,7 @@ class XMLQuery(ABC, Action):
         pass
 
 
-class XPathQueryError(Exception):
+class XMLQueryError(Exception):
 
     def __init__(self, message, **kwargs):
         super().__init__(message)
@@ -130,7 +177,7 @@ class Replace(XPathQuery):
 class Update(XPathQuery):
     """Query to update XML element attributes."""
 
-    attrs: Dict[str, Any]
+    attrs: Dict[str, int | float | bool | str | Expr | Expr]
 
     @staticmethod
     def new(xpath: str, attrs: Dict[str, Any]):
