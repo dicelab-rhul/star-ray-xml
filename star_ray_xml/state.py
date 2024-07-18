@@ -214,6 +214,7 @@ class _XMLState(XMLState):
         """
         elements = self.xpath(query.xpath)
         result = [_XMLState.select_from_element(element, query) for element in elements]
+        # print(result)
         return result
 
     @staticmethod

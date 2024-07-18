@@ -1,6 +1,24 @@
-
 [project]
+name = "star_ray_xml"
+version = "0.0.3"
+description = "An extension to the star_ray platform that uses XML as a description language for the state of an environment."
+authors = [{name = "Benedict Wilkins", email = "benrjw@gmail.com"}]
+license = { file = "LICENSE" }
+readme = "README.md"
 requires-python = ">=3.10"
+
+[project.urls]
+Repository = "https://github.com/dicelab-rhul/star-ray-xml"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+star_ray = ">=0.0.4"
+lxml = "*"
+pydantic = "*"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.

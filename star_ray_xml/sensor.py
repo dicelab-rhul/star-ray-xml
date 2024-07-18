@@ -20,7 +20,8 @@ class XMLSensor(Sensor):
         Returns:
             Select: the action
         """
-        return select("/*")  # select all xml data
+        action = select("/*")  # select all xml data
+        return action
 
     @attempt
     def element_exists(self, element_id: str) -> Select:

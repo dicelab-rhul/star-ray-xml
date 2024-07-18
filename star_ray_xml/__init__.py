@@ -1,4 +1,4 @@
-"""The `star_ray_xml` package uses XML as the description language for the state of an environment. It supports read/write queries of the XML state via `xpath`, providing a language with which agents can take actions and observe their environment.
+"""The `star_ray_xml` package is an extension of [`star_ray`](https://github.com/dicelab-rhul/star-ray) that uses XML as the description language for the state of an environment. It supports read/write queries of the XML state via [xpath](https://www.w3schools.com/xml/xpath_intro.asp), providing a language with which agents can take actions and observe their environment.
 
 Important classes:
     `XMLState` : which defines the public API which an `Ambient` may use to access the underlying state.
