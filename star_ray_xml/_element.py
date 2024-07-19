@@ -1,6 +1,6 @@
 import re
 import ast
-from typing import Any, Dict, List, Tuple
+from typing import Any
 from lxml import etree as ET
 from .query import XMLQueryError, Expr
 
@@ -38,32 +38,32 @@ class _Element:
             return None
         return _Element(parent)
 
-    def get_children(self) -> List["_Element"]:
+    def get_children(self) -> list["_Element"]:
         """Retrieves all direct children of this element.
 
         Returns:
-            List[_Element]: A list of element wrappers for the children of this element.
+            list[_Element]: A list of element wrappers for the children of this element.
         """
         return [_Element(child) for child in self._base.getchildren()]
 
-    def get_attributes(self) -> Dict[str, str]:
+    def get_attributes(self) -> dict[str, str]:
         """Retrieves all attributes of this element as a dictionary. This does not include special attributes (those prefixed with `@`) such as `@text`, `@tag`, etc.
 
         Returns:
-            Dict[str, str]: A dictionary containing attribute names and their corresponding values.
+            dict[str, str]: A dictionary containing attribute names and their corresponding values.
         """
         # TODO what about special attributes like @text, @tail or @prefix ?
         return dict(**self._base.attrib)
 
-    def xpath(self, xpath: str, namespaces: Dict[str, str]) -> List["_Element"]:
+    def xpath(self, xpath: str, namespaces: dict[str, str]) -> list["_Element"]:
         """Evaluates an XPath expression from this element.
 
         Args:
             xpath (str): The XPath query string (see https://www.w3schools.com/xml/xpath_intro.asp for details on xpath queries)
-            namespaces (Dict[str, str]): A dictionary of namespace prefixes to XML URIs.
+            namespaces (dict[str, str]): A dictionary of namespace prefixes to XML URIs.
 
         Returns:
-            List[_Element]: A list of elements matching the XPath query (empty if there was no match).
+            list[_Element]: A list of elements matching the XPath query (empty if there was no match).
         """
         elements = self._base.xpath(xpath, namespaces=namespaces)
         if not isinstance(elements, list):
@@ -119,7 +119,6 @@ class _Element:
         Returns:
             str: The text content of the element.
         """
-
         return self._base.text
 
     @text.setter
@@ -140,7 +139,6 @@ class _Element:
         Returns:
             str: The tail text of the element.
         """
-
         return self._base.tail
 
     @tail.setter
@@ -157,6 +155,7 @@ class _Element:
     @property
     def head(self) -> str:
         """Retrieves the head text (text immediately preceding this element).
+
         Returns:
             str: The head text of the element.
         """
@@ -174,7 +173,6 @@ class _Element:
         Args:
                     value (Any): The text to set as the head.
         """
-
         if isinstance(value, Expr):
             value = value.eval(self)
         prev = self._base.getprevious()
@@ -186,7 +184,7 @@ class _Element:
 
     def get(
         self, key: str, default: Any = None
-    ) -> str | int | bool | float | List | Dict | Tuple:
+    ) -> str | int | bool | float | list | dict | tuple:
         """Retrieves the value of an attribute or returns a default value if the attribute does not exist.
 
         Args:
@@ -236,16 +234,17 @@ class _Element:
         return self._base.remove(element._base)
 
     def remove_attribute(self, attribute_name: str):
-        """Removes an attribute from this element. This does not work with special attributes (prefixed with `@`). Use the corresponding methods:
+        """Removes an attribute from this element.
+
+        This does not work with special attributes (prefixed with `@`). Use the corresponding methods:
         - `@text` : `remove_text`
         - `@tail` : `remove_tail`
         - `@head` : `remove_head`
         Other special attributes (`@prefix`, `@tag` `@name`) cannot be removed.
 
-                Args:
-                    attribute_name (str): The name of the attribute to remove.
+        Args:
+            attribute_name (str): The name of the attribute to remove.
         """
-
         del self._base.attrib[attribute_name]
 
     def remove_text(self):
@@ -321,7 +320,6 @@ class _Element:
         Returns:
             bool: True if this element represents text content, otherwise False.
         """
-
         return self._base.is_text
 
     @property
@@ -340,7 +338,7 @@ class _Element:
         Returns:
             bool: True if this element is a literal value, otherwise False.
         """
-        return isinstance(self._base, (int, float, bool))
+        return isinstance(self._base, int | float | bool)
 
     @property
     def is_unicode_result(self):
@@ -398,6 +396,7 @@ class _Element:
 
     def iter_parents(self):
         """Generator that traverses upward through the element tree yielding each parent element.
+
         Yields:
             _Element: The next parent element.
         """
@@ -409,14 +408,14 @@ class _Element:
     @staticmethod
     def literal_eval(
         value: str,
-    ) -> str | int | float | bool | List | Tuple | Dict | None:
-        """Safely evaluates a string to a Python literal (str, int, float, bool, List, Tuple, Dict) if possible.
+    ) -> str | int | float | bool | list | tuple | dict | None:
+        """Safely evaluates a string to a Python literal (str, int, float, bool, list, tuple, dict) if possible.
 
         Args:
-                    value (str): The string to evaluate.
+            value (str): The string to evaluate.
 
-                Returns:
-                    str | int | float | bool | List | Tuple | Dict | None: The evaluated Python literal, or the original string if evaluation fails - this means it could not be evalated to a python literal. Will return `None` if `None` is provided.
+        Returns:
+            str | int | float | bool | list | tuple | dict | None: The evaluated Python literal, or the original string if evaluation fails - this means it could not be evalated to a python literal. Will return `None` if `None` is provided.
         """
         if value is None:
             return None
