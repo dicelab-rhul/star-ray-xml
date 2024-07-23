@@ -123,7 +123,27 @@ class XPathQuery(XMLQuery):
     xpath: str
 
 
-class Update(XPathQuery):
+class XMLUpdateQuery(XMLQuery):
+    """Base class that defines properties: `is_read`, `is_write`, `is_write_element`, `is_write_tree`, for events that will only ever write to elements attributes."""
+
+    @property
+    def is_read(self):  # noqa: D102
+        return False
+
+    @property
+    def is_write(self):  # noqa: D102
+        return True
+
+    @property
+    def is_write_tree(self):  # noqa: D102
+        return False
+
+    @property
+    def is_write_element(self):  # noqa: D102
+        return True
+
+
+class Update(XPathQuery, XMLUpdateQuery):
     """Query to update XML element attributes."""
 
     attrs: dict[str, int | float | bool | str | Expr | Expr]
@@ -143,22 +163,6 @@ class Update(XPathQuery):
             `update` for further details.
         """
         return Update(xpath=xpath, attrs=attrs)
-
-    @property
-    def is_read(self):  # noqa: D102
-        return False
-
-    @property
-    def is_write(self):  # noqa: D102
-        return True
-
-    @property
-    def is_write_tree(self):  # noqa: D102
-        return False
-
-    @property
-    def is_write_element(self):  # noqa: D102
-        return True
 
     def __execute__(self, state: XMLState) -> Any:  # noqa: D105
         return state.update(self)
@@ -405,3 +409,34 @@ def select(xpath: str, attrs: list[str] = None):
         Select: select query
     """
     return Select(xpath=xpath, attrs=attrs)
+
+
+# TODO do the others is_select_query, is_insert_query, is_replace_query, is_delete_query
+
+
+def is_update_query(cls):
+    """Class decorator that will automatically add relevant properties is_read, is_write, is_write_element, is_write_tree to a class treating it as an Update query."""
+
+    @property
+    def is_read(self):
+        return False
+
+    @property
+    def is_write(self):
+        return True
+
+    @property
+    def is_write_tree(self):
+        return False
+
+    @property
+    def is_write_element(self):
+        return True
+
+    # Add the properties to the class
+    cls.is_read = is_read
+    cls.is_write = is_write
+    cls.is_write_tree = is_write_tree
+    cls.is_write_element = is_write_element
+
+    return cls

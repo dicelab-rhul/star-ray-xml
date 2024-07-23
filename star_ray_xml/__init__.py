@@ -29,6 +29,7 @@ from .query import (
     Replace,
     Update,
     XMLQuery,
+    XMLUpdateQuery,
     XPathQuery,
     XMLQueryError,
 )
@@ -54,6 +55,7 @@ __all__ = (
     "Expr",
     "Expr",
     "XMLQuery",
+    "XMLUpdateQuery",  # TODO others coming
     "XPathQuery",
     "XMLQueryError",
 )

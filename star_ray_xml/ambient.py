@@ -84,14 +84,14 @@ class XMLAmbient(Ambient):
 
     def __update__(
         self, action: XMLQuery
-    ) -> ActiveObservation | ErrorActiveObservation:
+    ) -> ActiveObservation | ErrorActiveObservation | None:
         """Execute a write action in this `Ambient`. These actions must derive `XMLQuery` to avoid an unknown action error.
 
         Args:
             action (XMLQuery): the action to execute.
 
         Returns:
-            ActiveObservation | ErrorActiveObservation: the resulting observation (or None if the result of the action is None)
+            ActiveObservation | ErrorActiveObservation | None: the resulting observation
         """
         try:
             values = action.__execute__(self._state)
