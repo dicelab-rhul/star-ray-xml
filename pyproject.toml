@@ -1,6 +1,6 @@
 [project]
 name = "star_ray_xml"
-version = "0.0.3"
+version = "0.0.4"
 description = "An extension to the star_ray platform that uses XML as a description language for the state of an environment."
 authors = [{name = "Benedict Wilkins", email = "benrjw@gmail.com"}]
 license = { file = "LICENSE" }
@@ -16,7 +16,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-star_ray = ">=0.0.4"
+star_ray = ">=0.0.5"
 lxml = ">=5.2.2"
 pydantic = ">=2.8.0"
 
