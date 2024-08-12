@@ -16,7 +16,17 @@ from star_ray.utils.literal_eval import literal_eval_with_ops
 if TYPE_CHECKING:
     from .state import XMLState, _Element
 
-__all__ = ("XMLQuery", "XPathQuery", "Update")
+__all__ = (
+    "XMLQuery",
+    "XPathQuery",
+    "Select",
+    "Update",
+    "Delete",
+    "Replace",
+    "Insert",
+    "XMLQueryError",
+    "XPathElementsNotFound",
+)
 
 
 class _format_dict_template(dict):
@@ -63,15 +73,19 @@ class Expr(BaseModel):  # TODO test this
 class XMLQueryError(Exception):
     """Error that may occur during the execution of an `XMLQuery`."""
 
-    def __init__(self, message, **kwargs):
+    def __init__(self, message, **kwargs):  # noqa
         super().__init__(message)
         self.kwargs = kwargs
 
-    def __str__(self):
+    def __str__(self):  # noqa
         return self.args[0].format(**self.kwargs)
 
-    def __repr__(self):
+    def __repr__(self):  # noqa
         return str(self)
+
+
+class XPathElementsNotFound(XMLQueryError):
+    """Error that indicates that an `xpath` query found no elements."""
 
 
 class XMLQuery(ABC, Action):
@@ -85,7 +99,7 @@ class XMLQuery(ABC, Action):
         """Execute method that defines this action. In this method you have direct access to the `XMLState` and can read/write properties by using the avaliable methods. Typically this will involve executing more primitive XMLQueries (such as `Select` and `Update`).
 
         Args:
-            state (XMLState): the current state
+            state (XMLState): the current (XML) state of the environment.
 
         Returns:
             Any: The result of executing this query. For write operations this may be None. Typically for read operations this will be some xml data or derived data.
@@ -198,22 +212,22 @@ class Insert(XPathQuery):
         )
 
     @property
-    def is_read(self):
+    def is_read(self):  # noqa
         return False
 
     @property
-    def is_write(self):
+    def is_write(self):  # noqa
         return True
 
     @property
-    def is_write_tree(self):
+    def is_write_tree(self):  # noqa
         return True
 
     @property
-    def is_write_element(self):
+    def is_write_element(self):  # noqa
         return False
 
-    def __execute__(self, state: XMLState) -> Any:
+    def __execute__(self, state: XMLState) -> Any:  # noqa
         return state.insert(self)
 
 
@@ -235,22 +249,22 @@ class Delete(XPathQuery):
         return Delete(xpath=xpath)
 
     @property
-    def is_read(self):
+    def is_read(self):  # noqa
         return False
 
     @property
-    def is_write(self):
+    def is_write(self):  # noqa
         return True
 
     @property
-    def is_write_tree(self):
+    def is_write_tree(self):  # noqa
         return True
 
     @property
-    def is_write_element(self):
+    def is_write_element(self):  # noqa
         return False
 
-    def __execute__(self, state: XMLState) -> Any:
+    def __execute__(self, state: XMLState) -> Any:  # noqa
         return state.delete(self)
 
 
@@ -278,22 +292,22 @@ class Replace(XPathQuery):
         return Replace(xpath=xpath, element=element)
 
     @property
-    def is_read(self):
+    def is_read(self):  # noqa
         return False
 
     @property
-    def is_write(self):
+    def is_write(self):  # noqa
         return True
 
     @property
-    def is_write_tree(self):
+    def is_write_tree(self):  # noqa
         return True
 
     @property
-    def is_write_element(self):
+    def is_write_element(self):  # noqa
         return False
 
-    def __execute__(self, state: XMLState) -> Any:
+    def __execute__(self, state: XMLState) -> Any:  # noqa
         return state.replace(self)
 
 
@@ -319,22 +333,22 @@ class Select(XPathQuery):
         return Select(xpath=xpath, attrs=attrs)
 
     @property
-    def is_read(self):
+    def is_read(self):  # noqa
         return True
 
     @property
-    def is_write(self):
+    def is_write(self):  # noqa
         return False
 
     @property
-    def is_write_tree(self):
+    def is_write_tree(self):  # noqa
         return False
 
     @property
-    def is_write_element(self):
+    def is_write_element(self):  # noqa
         return False
 
-    def __execute__(self, state: XMLState) -> Any:
+    def __execute__(self, state: XMLState) -> Any:  # noqa
         return state.select(self)
 
 

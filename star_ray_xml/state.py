@@ -5,7 +5,15 @@ from typing import Any
 from functools import wraps
 from lxml import etree as ET
 
-from .query import Select, Update, Delete, Replace, Insert, XMLQueryError
+from .query import (
+    Select,
+    Update,
+    Delete,
+    Replace,
+    Insert,
+    XMLQueryError,
+    XPathElementsNotFound,
+)
 from ._element import _Element, XML_START_PATTERN
 
 __all__ = ("XMLState", "_XMLState")
@@ -131,6 +139,10 @@ class _XMLState(XMLState):
             query (Update): query
         """
         elements = self.xpath(query.xpath)
+        if len(elements) == 0:
+            raise XPathElementsNotFound(
+                "Invalid xpath: `{xpath}` for `update`, no elements were found at this path.",
+            )
         for element in elements:
             _XMLState.update_element_attributes(element, query.attrs)
 
@@ -142,12 +154,12 @@ class _XMLState(XMLState):
             query (Insert): query
 
         Raises:
-            XMLQueryError: if a parent element could not be found (this is defined by the `xpath` of the Insert query)
+            XPathElementsNotFound: if a parent element could not be found (this is defined by the `xpath` of the Insert query)
             XMLQueryError: If multiple parents were found - this is not currently supported by may be in the future.
         """
         elements = self.xpath(query.xpath)
         if len(elements) == 0:
-            raise XMLQueryError(
+            raise XPathElementsNotFound(
                 "Invalid xpath: `{xpath}` for `insert`, no parent element was found at this path.",
             )
         if len(elements) > 1:
@@ -196,8 +208,8 @@ class _XMLState(XMLState):
         """
         elements = self.xpath(query.xpath)
         if len(elements) == 0:
-            raise XMLQueryError(
-                "No elements was found for deletion at xpath: {xpath}",
+            raise XPathElementsNotFound(
+                "Invalid xpath: `{xpath}` for `delete`, no elements were found at this path.",
             )
         for element in elements:
             _XMLState.delete_element(element)
@@ -213,6 +225,10 @@ class _XMLState(XMLState):
             list[Any]: list of results of the select (one per xpath result), typically will consist of python literal types (int, float, bool, str, list, dict).
         """
         elements = self.xpath(query.xpath)
+        if len(elements) == 0:
+            raise XPathElementsNotFound(
+                "Invalid xpath: `{xpath}` for `select`, no elements were found at this path.",
+            )
         result = [_XMLState.select_from_element(element, query) for element in elements]
         return result
 

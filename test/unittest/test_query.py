@@ -2,7 +2,15 @@
 
 import unittest
 import re
-from star_ray_xml import _XMLState, XMLQueryError, select, delete, update, insert
+from star_ray_xml import (
+    _XMLState,
+    XMLQueryError,
+    XPathElementsNotFound,
+    select,
+    delete,
+    update,
+    insert,
+)
 
 XML = """
 <svg:svg width="200" height="200" xmlns:svg="http://www.w3.org/2000/svg">
@@ -159,11 +167,11 @@ class TestSelect(unittest.TestCase):
     def test_select_text(self):
         """Test selecting text."""
         state = _XMLState(XML, namespaces=NAMESPACES)
-        result1 = state.select(select(xpath="//svg:svg/svg:g[@id='g1']/text()"))
+        with self.assertRaises(XPathElementsNotFound):
+            result1 = state.select(select(xpath="//svg:svg/svg:g[@id='g1']/text()"))
         result2 = state.select(
             select(xpath="//svg:svg/svg:g[@id='g1']", attrs=["@text"])
         )
-        self.assertEqual(len(result1), 0)
         self.assertIsNone(result2[0]["@text"])
         result1 = state.select(select(xpath="//svg:svg/svg:g[@id='g2']/text()"))
         result2 = state.select(

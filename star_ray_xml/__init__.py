@@ -32,6 +32,7 @@ from .query import (
     XMLUpdateQuery,
     XPathQuery,
     XMLQueryError,
+    XPathElementsNotFound,
 )
 from .state import XMLState, _XMLState
 from .ambient import XMLAmbient
@@ -58,4 +59,5 @@ __all__ = (
     "XMLUpdateQuery",  # TODO others coming
     "XPathQuery",
     "XMLQueryError",
+    "XPathElementsNotFound",
 )

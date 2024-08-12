@@ -1,8 +1,15 @@
 """Some utility functions for querying XML."""
 
+import re
 import ast
 import html
 from lxml import etree as ET
+
+_XPATH_ID_PATTERN = re.compile(r".*@id='([^']*)'")
+
+
+def extract_id_from_xpath(xpath: str):
+    return re.match(_XPATH_ID_PATTERN, xpath.rsplit("/", 1)[-1]).group(1)
 
 
 def xml_to_primitive(value: str):
