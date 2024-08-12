@@ -1,13 +1,13 @@
 [project]
 name = "star_ray_xml"
-version = "0.0.5"
+version = "0.0.6"
 description = "An extension to the star_ray platform that uses XML as a description language for the state of an environment."
 authors = [{name = "Benedict Wilkins", email = "benrjw@gmail.com"}]
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies=[
-  "star_ray>=0.0.6",
+  "star_ray>=0.0.7",
   "lxml>=5.2.2",
   "pydantic>=2.8.2",
 ]
